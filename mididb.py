@@ -1,3 +1,4 @@
+from operator import itemgetter
 import os
 
 #DEFAULT_DIR = "../../midisong/130000_Pop_Rock_Classical_Videogame_EDM_MIDI_Archive[6_19_15]"
@@ -9,7 +10,12 @@ class MidiFileDatabase(object):
         self.folders = {}
         self.count = 0
         self.load_filenames("root", root)
-        self.folder_names = self.folders.keys() # TODO: sort
+        self.folder_names = sorted(self.folders.keys())
+
+        import pdb
+        pdb.set_trace()
+        for k in self.folders.keys():
+            self.folders[k] = sorted(self.folders[k], key=itemgetter(1))
 
         self.cur_folder_index = 0
         self.cur_file_index = 0

@@ -62,6 +62,7 @@ def main():
                 elif (ch == "q"):
                     break
     finally:
+        player.shutdown()
         termios.tcsetattr(stdin_fd, termios.TCSAFLUSH, old_term)
 
 if __name__ == "__main__":

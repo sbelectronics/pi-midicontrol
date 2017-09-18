@@ -4,6 +4,7 @@ import termios
 import tty
 
 from midiplayer import MidiPlayer
+from options import parse_options
 
 class ConsoleMidiPlayer(MidiPlayer):
     def update_status(self, error=None):
@@ -23,14 +24,23 @@ def getchar():
     return ch
 
 def main():
-    player = ConsoleMidiPlayer()
+    (options, args) = parse_options()
+
+    player = ConsoleMidiPlayer(root = options.dir)
 
     print "Loaded ", player.count, "files into database"
 
+    if (options.writecatalog):
+        player.write_catalog()
+        print "catalog saved"
+        return
+
     print "n - next file"
     print "p - previous file"
-    print "> - next folder"
-    print "< - previous folder"
+    print "> - next sub-folder"
+    print "< - previous sub-folder"
+    print "] - next major-folder"
+    print "[ - previous major-folder"
     print "q - quit"
 
     print ""
@@ -59,6 +69,10 @@ def main():
                     player.next_folder()
                 elif (ch == "<"):
                     player.prev_folder()
+                elif (ch == "]"):
+                    player.next_major()
+                elif (ch == "["):
+                    player.prev_major()
                 elif (ch == "q"):
                     break
     finally:

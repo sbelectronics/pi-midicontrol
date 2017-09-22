@@ -72,6 +72,7 @@ class PlayerThread(Thread):
             else:
                 self.fail_return(stderr=stderr)
         finally:
+            print "done"
             self.done = True
 
     def kill_process(self):

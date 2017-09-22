@@ -1,0 +1,12 @@
+sudo raspi-config
+    enable i2c
+
+sudo emacs /etc/modules
+    # add the following:
+    i2c-bcm2708
+    i2c-dev
+
+sudo apt-get install python-smbus i2c-tools
+
+#test
+sudo i2cdetect -y 1

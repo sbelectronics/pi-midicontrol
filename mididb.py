@@ -24,6 +24,19 @@ class MidiFileDatabase(object):
         self.cur_folder_index = 0
         self.cur_file_index = 0
 
+        self.folder_common_prefix = self.find_common_prefix()
+
+    def find_common_prefix(self):
+        prefix_len = 1
+        common_prefix = ""
+        while (prefix_len <= len(self.folder_names[0].split("/"))):
+            prefix = "/".join(self.folder_names[0].split("/")[:prefix_len]) + "/"
+            for name in self.folder_names:
+                if not (name.startswith(prefix)):
+                    return common_prefix
+            common_prefix=prefix
+            prefix_len += 1
+        return ""
 
     def load_filenames(self, folder, path):
         for fn in os.listdir(path):
@@ -39,8 +52,12 @@ class MidiFileDatabase(object):
                 self.count += 1
 
     @property
+    def cur_folder_name(self):
+        return self.folder_names[self.cur_folder_index]
+
+    @property
     def cur_folder(self):
-        return self.folders[self.folder_names[self.cur_folder_index]]
+        return self.folders[self.cur_folder_name]
 
     @property
     def cur_song(self):
@@ -94,7 +111,7 @@ class MidiFileDatabase(object):
             self.change_event()
 
     def next_folder(self, amount=1, no_event=False):
-        self.cur_folder_index += 1
+        self.cur_folder_index += amount
         if (self.cur_folder_index >= len(self.folder_names)):
             self.cur_folder_index = 0
         self.cur_file_index = 0
@@ -102,7 +119,7 @@ class MidiFileDatabase(object):
             self.change_event()
 
     def prev_folder(self, amount=1, no_event=False):
-        self.cur_folder_index -= 1
+        self.cur_folder_index -= amount
         if (self.cur_folder_index < 0):
             self.cur_folder_index = len(self.folder_names)-1
         self.cur_file_index = 0
@@ -111,13 +128,13 @@ class MidiFileDatabase(object):
 
     def next_file(self, amount=1):
         folder = self.cur_folder
-        self.cur_file_index += 1
+        self.cur_file_index += amount
         if (self.cur_file_index >= len(folder)):
             self.next_folder(no_event=True)
         self.change_event()
 
     def prev_file(self, amount=1):
-        self.cur_file_index -= 1
+        self.cur_file_index -= amount
         if (self.cur_file_index <0):
             self.prev_folder(no_event=True)
             self.cur_file_index = len(self.cur_folder)-1

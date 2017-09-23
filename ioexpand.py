@@ -1,3 +1,5 @@
+import threading
+
 IODIR = 0x00
 IPOL = 0x02
 GPINTEN = 0x04
@@ -17,7 +19,7 @@ IOCON_HAEN = 0x80
 IOCON_ODR = 0x40
 IOCON_INTPOL = 0x20
 
-class MCP23017:
+class MCP23017(object):
    def __init__(self, bus, addr):
        self.addr = addr
        self.bus = bus
@@ -86,6 +88,19 @@ class MCP23017:
    def not_gpio(self, bank, bits):
         bits = ((~bits) & 0xFF)
         self.set_gpio(bank, self.gpio_bits[bank] & bits)
+
+class MCP23017_threadsafe(MCP23017):
+    def __init__(self, bus, addr):
+        super(MCP23017_threadsafe, self).__init__(bus, addr)
+        self.lock = threading.Lock()
+
+    def writereg(self, reg, bits):
+        with self.lock:
+            super(MCP23017_threadsafe, self).writereg(reg, bits)
+
+    def readreg(self, reg):
+        with self.lock:
+            return super(MCP23017_threadsafe, self).readreg(reg)
 
 class PCF8574:
     def __init__(self, bus, addr):

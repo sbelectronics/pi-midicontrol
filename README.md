@@ -24,6 +24,10 @@ Specify the directory on the command line with the `-d` option, for example: `py
 
 Press the encoder down to switch the cursor between folder and file selection mode. Rotate the encoder to move to a new file (or a new folder).
 
-The rightmost button can be used to engage "fast mode". In fast mode, if the cursor is set to song, then each tick of the encoder moves ten songs instead of one. 
+The leftmost button can be used to engage "fast mode". In fast mode, if the cursor is set to song, then each tick of the encoder moves ten songs instead of one. 
 
 If using fast mode on while the cursor is set folders, then it will attempt to skip sub-folders (for example, if there is `/a/foo`, `/a/bar`, and `/b/foo` then fast mode would skip from `/a/foo` to `/b/foo`).   
+
+## Shutdown notification
+
+To enable "halting..." display on the VFD, add the following to `/etc/init.d/halt`: `python /home/pi/pi-midicontrol/vfd_msg.py Halted. || true` right before it calls `halt -d...`.

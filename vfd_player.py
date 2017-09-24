@@ -1,6 +1,5 @@
-import select
+import os
 import sys
-import termios
 import time
 import tty
 import smbus
@@ -10,7 +9,7 @@ from midiplayer import MidiPlayer
 from options import parse_options
 
 from ioexpand import MCP23017, MCP23017_threadsafe
-from vfdcontrol import VFDController, trimpad
+from vfdcontrol import VFDController, trimpad, COLOR_GREEN, COLOR_RED, COLOR_NONE
 
 CURSOR_SONG = "song"
 CURSOR_FOLDER = "folder"
@@ -23,7 +22,14 @@ class VFDMidiPlayer(MidiPlayer):
 
     def update_status(self, error=None):
         if (error):
+            self.display.set_color(COLOR_RED)
+            self.display.cls()
+            self.display.writeStr("Error!")
+            self.display.setPosition(0,1)
+            self.display.writeStr(error[:16])
             print "Error: ", error
+        else:
+            self.display.set_color(COLOR_GREEN)
 
         if self.cursor == CURSOR_SONG:
             cursor_folder=" "
@@ -39,14 +45,24 @@ class VFDMidiPlayer(MidiPlayer):
         self.display.setPosition(0,1)
         self.display.writeStr(cursor_song + trimpad(self.cur_song[1], 15))
 
+    def halt_machine(self):
+        self.shutdown()
+        os.system("/sbin/halt")
+        self.display.cls()
+        self.display.writeStr("Halting...")
+        sys.exit(0)
+
     def poll(self):
         # button3 toggles between folder and song
-        if self.display.poller.get_button3_event():
+        if self.display.poller.get_button1_event():
             if self.cursor == CURSOR_SONG:
                 self.cursor = CURSOR_FOLDER
             else:
                 self.cursor = CURSOR_SONG
             self.update_status()
+
+        if self.display.poller.get_button2_event():
+            self.halt_machine()
 
         delta = self.display.poller.get_delta()
 
@@ -81,16 +97,6 @@ class VFDMidiPlayer(MidiPlayer):
         if self.idle:
             self.next_file()
 
-def getchar():
-    fd = sys.stdin.fileno()
-    old_tcattr = termios.tcgetattr(fd)
-    try:
-        tty.setraw(fd)
-        ch = sys.stdin.read(1)
-    finally:
-        termios.tcsetattr(fd, termios.TCSADRAIN, old_tcattr)
-    return ch
-
 def main():
     (options, args) = parse_options()
 
@@ -99,6 +105,7 @@ def main():
 
     display.setDisplay(True, False, False)
     display.cls()
+    display.set_color(COLOR_NONE)
 
     player = VFDMidiPlayer(root = options.dir, display=display)
 
@@ -108,12 +115,6 @@ def main():
         player.write_catalog()
         print "catalog saved"
         return
-
-    stdin_fd = sys.stdin.fileno()
-    new_term = termios.tcgetattr(stdin_fd)
-    old_term = termios.tcgetattr(stdin_fd)
-    new_term[3] = (new_term[3] & ~termios.ICANON & ~termios.ECHO)
-    termios.tcsetattr(stdin_fd, termios.TCSAFLUSH, new_term)
 
     try:
         while True:

@@ -21,6 +21,15 @@ BIT_DB7 = 0x20
 BIT_WR = 0x40
 BIT_BUTTON3 = 0x80
 
+COLOR_NONE = 0
+COLOR_RED = BIT_ENC_RD
+COLOR_GREEN = BIT_ENC_GR
+COLOR_BLUE = BIT_ENC_BL
+COLOR_WHITE = BIT_ENC_RD | BIT_ENC_GR | BIT_ENC_BL
+COLOR_YELLOW = BIT_ENC_RD | BIT_ENC_GR
+COLOR_CYAN = BIT_ENC_BL | BIT_ENC_GR
+COLOR_MAGENTA = BIT_ENC_BL | BIT_ENC_RD
+
 # amount of time to hold E high or low. Seems like 0 works just fine, the display can be clocked as fast as we can
 # clock it.
 E_TICK = 0 # 0.00001
@@ -139,6 +148,11 @@ class VFDController(object):
     # -----------------------------------------------------------------------------------------------------------------
     # encoder stuff
     # -----------------------------------------------------------------------------------------------------------------
+
+    def set_color(self, color):
+        color = ~color & (BIT_ENC_RD | BIT_ENC_GR | BIT_ENC_BL)
+        with self.lock:
+            self.io.set_gpio(0, color)
 
     def poll_input(self):
         with self.lock:

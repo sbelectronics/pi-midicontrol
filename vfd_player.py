@@ -53,23 +53,22 @@ class VFDMidiPlayer(MidiPlayer):
         sys.exit(0)
 
     def poll(self):
-        # button3 toggles between folder and song
-        if self.display.poller.get_button1_event():
+        # pushing the encoder toggles between folder and song
+        if self.display.poller.get_button_enc_event():
             if self.cursor == CURSOR_SONG:
                 self.cursor = CURSOR_FOLDER
             else:
                 self.cursor = CURSOR_SONG
             self.update_status()
 
+        # button2 halts
         if self.display.poller.get_button2_event():
             self.halt_machine()
 
         delta = self.display.poller.get_delta()
 
-        if (delta!=0):
-            print delta
-
-        fastmode = not self.display.button2_state
+        # button1 engages fastmode
+        fastmode = not self.display.button1_state
 
         if delta > 0:
             if self.cursor==CURSOR_FOLDER:

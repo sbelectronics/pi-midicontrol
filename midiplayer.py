@@ -114,7 +114,7 @@ class MidiPlayer(MidiFileDatabase):
         self.idle = True
 
     def all_notes_off(self):
-        fd = open("/dev/ttyAMA0","w", 0)
+        fd = open("/dev/ttyS0","w", 0) # was /dev/ttyAMA0
         for i in range(0, 16):
             fd.write(chr(0xB0 + i))
             fd.write(chr(123))
